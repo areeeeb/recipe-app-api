@@ -55,7 +55,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """return appropriate serializer class"""
         if self.action == 'retrieve':
             return serializers.RecipeDetailSerializer
-        elif self.action == 'upload_image':
+        elif self.action == 'image':
             return serializers.RecipeImageSerializer
 
         return self.serializer_class
@@ -64,25 +64,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Create a new recipe"""
         return serializer.save(user=self.request.user)
 
-    @action(methods=['POST'], detail=True, url_path='upload-image')
-    def upload_image(self, request, pk=None):
+    @action(methods=['POST', 'GET'], detail=True, url_path='image')
+    def image(self, request, pk=None):
         """Upload an image to the recipe"""
         recipe = self.get_object()
-        serializer = self.get_serializer(
-            recipe,
-            data=request.data
-        )  # Passing recipe and the request data (image) to the serializer
+        if request.method == 'POST':
+            serializer = self.get_serializer(
+                recipe,
+                data=request.data
+            )  # Passing recipe and the request data (image) to the serializer
 
-        if serializer.is_valid():
-            """Checking if the data passed in serializer is valid and then
-            saving it"""
-            serializer.save()
+            if serializer.is_valid():
+                """Checking if the data passed in serializer is valid and then
+                saving it"""
+                serializer.save()
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_200_OK
+                )
+
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif request.method == 'GET':
+            serializer = self.get_serializer(
+                recipe
+            )
             return Response(
                 serializer.data,
                 status=status.HTTP_200_OK
             )
-
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )

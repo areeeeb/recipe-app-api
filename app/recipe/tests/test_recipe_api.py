@@ -20,7 +20,7 @@ RECIPES_URL = reverse('recipe:recipe-list')
 
 def image_upload_url(recipe_id):
     """Return URL for recipe image upload"""
-    return reverse('recipe:recipe-upload-image', args=[recipe_id])
+    return reverse('recipe:recipe-image', args=[recipe_id])
 
 
 def detailed_url(recipe_id):
