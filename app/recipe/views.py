@@ -21,7 +21,14 @@ class BaseRecipeAttrViewSet(mixins.ListModelMixin,
         # we are using this function to to modify the queryset instead of the \
         # class variable because if we want to change the model in the future \
         # we just have to set the model in the queryset class variable.
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        assigned_only = bool(self.request.query_params.get('assigned_only'))
+        queryset = self.queryset
+
+        if assigned_only:
+            queryset = queryset.filter(recipe__isnull=False)
+            # here 'r' of recipe is small letter because of reverse relation
+
+        return queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
         """Create a new object"""
